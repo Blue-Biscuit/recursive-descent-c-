@@ -1,0 +1,17 @@
+int add(int argA, int argB) {
+    int sum;
+
+    sum = argA + argB;
+
+    return sum;
+}
+
+void main() {
+    int idA;
+    int idB;
+
+    idA = 3;
+    idB = 5;
+
+    add(idA, idB);
+}
