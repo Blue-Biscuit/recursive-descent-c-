@@ -288,10 +288,7 @@ public class CMinusParser implements Parser {
 
     // statement → expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
     protected Statement parseStatement() { // Implemented
-        ExpressionStatement es = null;
-        SelectionStatement ss = null;
-        IterationStatement is = null;
-        ReturnStatement rs = null;
+        Statement result;
 
         // Parse expression-stmt
         // first(expression-stmt) = first(expression) U { ; } = {id, (, num, { }
@@ -303,25 +300,25 @@ public class CMinusParser implements Parser {
             nextIs(TokenType.NUM)
         )
         {
-            es = parseExpressionStatement();
+            result = parseExpressionStatement();
         }
 
         // Parse selection-stmt
         // first(selection-stmt) = { if }
         else if (nextIs(TokenType.IF)) {
-            ss = parseSelectionStatement();
+            result = parseSelectionStatement();
         }
 
         // Parse iteration-stmt
         // first(iteration-stmt) = { while }
         else if (nextIs(TokenType.WHILE)) {
-            is = parseIterationStatement();
+            result = parseIterationStatement();
         }
 
         // Parse return-stmt
         // first(return-stmt) = { return }
         else if (nextIs(TokenType.RETURN)) {
-            rs = parseReturnStatement();
+            result = parseReturnStatement();
         }
 
         // Otherwise, throw a syntax error.
@@ -330,7 +327,7 @@ public class CMinusParser implements Parser {
             throw new SyntaxException("Syntax Error: invalid token. Expected SEMI");
         }
 
-        return new Statement(es, ss, is, rs);
+        return result;
     }
 
     // expression-stmt → [expression] ;	

@@ -24,6 +24,7 @@ public class Param {
         if (isArray) {
             sb.append("[]");
         }
+        sb.append('\n');
 
         return sb.toString();
     }

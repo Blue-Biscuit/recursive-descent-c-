@@ -19,16 +19,18 @@ public class FunctionDeclaration extends Declaration {
         Common.addTabs(sb, tabs, spcInTab);
         sb.append("Function Declaration {\n");
 
-        Common.addTabs(sb, tabs, spcInTab);
+        Common.addTabs(sb, tabs + 1, spcInTab);
         sb.append("identifier: ");
         sb.append(this.id);
         sb.append('\n');
 
-        Common.addTabs(sb, tabs, spcInTab);
+        Common.addTabs(sb, tabs + 1, spcInTab);
         sb.append("Params {\n");
         for (int i = 0; i < params.size(); i++) {
-            sb.append(this.params.get(i).toString(tabs + 1, spcInTab));
+            sb.append(this.params.get(i).toString(tabs + 2, spcInTab));
         }
+        Common.addTabs(sb, tabs + 1, spcInTab);
+        sb.append("}\n");
 
         sb.append(stmts.toString(tabs + 1, spcInTab));
 
