@@ -1,18 +1,11 @@
 package com.compth;
 
-// iteration-stmt → while ( expression ) statement
-public class IterationStatement {
-    private Expression exp;
-    private Statement statement;
+public class IterationStatement extends Statement {
+    private final Statement stmt;
 
     public IterationStatement(Expression exp, Statement statement) {
-        this.exp = exp;
-        this.statement = statement;
-    }
-
-    @Override
-    public String toString() {
-        return toString(0, 3);
+        super(exp);
+        this.stmt = statement;
     }
 
     public String toString(int tabs, int spacesInTabs) {
@@ -23,8 +16,8 @@ public class IterationStatement {
         sb.append("Iteration Statement {\n");
 
         // Expression and Statement
-        sb.append(exp.toString(tabs + 1, spacesInTabs));
-        sb.append(statement.toString(tabs + 1, spacesInTabs));
+        sb.append(this.expression.toString(tabs + 1, spacesInTabs));
+        sb.append(this.stmt.toString(tabs + 1, spacesInTabs));
 
         // Close bracket
         Common.addTabs(sb, tabs, spacesInTabs);

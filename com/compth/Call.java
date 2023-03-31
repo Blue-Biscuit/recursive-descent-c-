@@ -26,6 +26,7 @@ public class Call extends Expression{
         for (Expression e : args) {
             sb.append(e.toString(tabs + 1, spcInTab));
         }
+        Common.addTabs(sb, tabs, spcInTab);
         sb.append(")\n");
 
         return sb.toString();

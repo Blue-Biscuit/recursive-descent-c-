@@ -26,7 +26,7 @@ public class Params {
 
         if (names.size() == 0) {
             Common.addTabs(sb, numTabs + 1, numSpacesInTab);
-            sb.append("void");
+            sb.append("void\n");
         }
 
         // Otherwise, print all parameters.

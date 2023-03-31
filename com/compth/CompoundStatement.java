@@ -26,6 +26,7 @@ public class CompoundStatement {
         for (String id : identifierNames) {
             Common.addTabs(sb, numTabs + 1, spacesInTabs);
             sb.append("int " + id);
+            sb.append('\n');
         }
 
         // Print the statements

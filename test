@@ -6,7 +6,7 @@ int add(int argA, int argB) {
     return sum;
 }
 
-void main() {
+void main(void) {
     int idA;
     int idB;
 

@@ -1,15 +1,8 @@
 package com.compth;
 
-public class ReturnStatement { // COMPLETE
-    private Expression expression;
-
+public class ReturnStatement extends Statement { // COMPLETE
     public ReturnStatement(Expression expression) {
-        this.expression = expression;
-    }
-
-    @Override
-    public String toString() {
-        return toString(0, 3);
+        super(expression);
     }
 
     public String toString(int tabs, int spacesInTab) {

@@ -127,59 +127,63 @@ public class CMinusParser implements Parser {
     protected Declaration parseDeclaration() { // IMPL
         // Parse void | int
 
-        String identifierString = "";
-        Params params = null;
-        CompoundStatement compoundStatement = null;
-        DeclarationPrime declarationPrime = null;
+        Declaration result;
 
         if (nextIs(TokenType.VOID)) {
             acceptToken(TokenType.VOID);
 
-            identifierString = nextText();
+            String id = nextText();
             acceptToken(TokenType.ID);
 
             acceptToken(TokenType.LPAREN);
-            params = parseParams();
+            ArrayList<Param> params = parseParams();
             acceptToken(TokenType.RPAREN);
 
-            compoundStatement = parseCompoundStatement();
+            CompoundStatement statements = parseCompoundStatement();
+
+            result = new FunctionDeclaration(id, TokenType.VOID, params, statements);
         }
         else if (nextIs(TokenType.INT)) {
             acceptToken(TokenType.INT);
 
-            identifierString = nextText();
+            String id = nextText();
             acceptToken(TokenType.ID);
 
-            declarationPrime = parseDeclarationPrime();
+            result = parseDeclarationPrime(id);
         }
         else {
             throw new SyntaxException("Syntax Error: invalid token. Expected VOID or INT.");
         }
 
-        return new Declaration(identifierString, params, compoundStatement, declarationPrime);
+        return result;
     }
 
     // declaration' -> [ \[ num \] ] ; | ( params ) compound-stmt
-    protected DeclarationPrime parseDeclarationPrime() { // Implemented
-        Params params = null;
-        CompoundStatement cmpd = null;
-        String num = null;
+    protected Declaration parseDeclarationPrime(final String id) { // Implemented
+        Declaration result;
 
         // Parse ( params ) compound-stmt
         if (nextIs(TokenType.LPAREN)) {
             acceptToken(TokenType.LPAREN);
-            params = parseParams();
+            final ArrayList<Param> params = parseParams();
             acceptToken(TokenType.RPAREN);
-            cmpd = parseCompoundStatement();
+            final CompoundStatement cmpd = parseCompoundStatement();
+
+            result = new FunctionDeclaration(id, TokenType.INT, params, cmpd);
         }
 
         // Parse [ \[ num \] ] ;
         else if (nextIs(TokenType.LBRACKET) || nextIs(TokenType.SEMI)) {
             if (nextIs(TokenType.LBRACKET)) {
                 acceptToken(TokenType.LBRACKET);
-                num = nextText();
+                int num = Integer.parseInt(nextText());
                 acceptToken(TokenType.NUM);
                 acceptToken(TokenType.RBRACKET);
+
+                result = new VariableDeclaration(id, num);
+            }
+            else {
+                result = new VariableDeclaration(id);
             }
 
             acceptToken(TokenType.SEMI);
@@ -190,13 +194,12 @@ public class CMinusParser implements Parser {
             throw new SyntaxException("Error: Expected (, [, or ;");
         }
 
-        return new DeclarationPrime(num, params, cmpd);
+        return result;
     }
 
     // params → int id [ \[ \] ] { , int id [ \[ \] ] } | void
-    protected Params parseParams() { // implemented
-        ArrayList<String> names = new ArrayList<>();
-        ArrayList<Boolean> areArrays = new ArrayList<>();
+    protected ArrayList<Param> parseParams() { // implemented
+        final ArrayList<Param> result = new ArrayList<>();
 
         // Parse the args.
         if (nextIs(TokenType.INT)) {
@@ -213,8 +216,7 @@ public class CMinusParser implements Parser {
                 array = true;
             }
             
-            names.add(name);
-            areArrays.add(array);
+            result.add(new Param(name, array));
 
             // Parse more arguments until you run out.
             while (nextIs(TokenType.COMMA)) {
@@ -232,8 +234,7 @@ public class CMinusParser implements Parser {
                     acceptToken(TokenType.RBRACKET);
                 }
 
-                names.add(name);
-                areArrays.add(array);
+                result.add(new Param(name, array));
             }
         }
 
@@ -247,7 +248,7 @@ public class CMinusParser implements Parser {
             throw new SyntaxException("Syntax Error: invalid token. Expected VOID or INT");
         }
 
-        return new Params(names, areArrays);
+        return result;
     }
 
     // compound-stmt → \{ { int id ; } { statement } \}

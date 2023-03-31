@@ -1,31 +1,23 @@
 package com.compth;
 
-public class ExpressionStatement {
-    private Expression expression;
+public class ExpressionStatement extends Statement {
 
-    public ExpressionStatement(Expression e) {
-        expression = e;
+    public ExpressionStatement(Expression expr) {
+        super(expr);
     }
 
-    @Override
-    public String toString() {
-        return toString(0, 3);
-    }
-
-    public String toString(int numTabs, int spacesInTab) {
+    @Override 
+    public String toString(int tabs, int spcInTab) {
         StringBuilder sb = new StringBuilder();
 
-        // Open bracket
-        Common.addTabs(sb, numTabs, spacesInTab);
-        sb.append("ExpressionStatement {\n");
+        Common.addTabs(sb, tabs, spcInTab);
+        sb.append("Expression Statement {\n");
 
-        // The expression, if extant.
-        if (expression != null) {
-            sb.append(expression.toString(numTabs + 1, spacesInTab));
+        if (this.expression != null) {
+            sb.append(this.expression.toString(tabs + 1, spcInTab));
         }
 
-        // Close bracket
-        Common.addTabs(sb, numTabs, spacesInTab);
+        Common.addTabs(sb, tabs, spcInTab);
         sb.append("}\n");
 
         return sb.toString();
