@@ -567,55 +567,6 @@ public class CMinusParser implements Parser {
         return result;
     }
 
-    protected Relop parseRelop() {
-        String specialSymbol = "";
-
-        if (nextIsRelop()) {
-            specialSymbol = nextText();
-            ptr++;
-        }
-        else {
-            throw new SyntaxException("Expected relop.");
-        }
-
-        return new Relop(specialSymbol);
-    }
-
-    protected Addop parseAddop() {
-        String specialSymbol = "";
-
-        if (nextIs(TokenType.PLUS)) {
-            specialSymbol = nextText();
-            acceptToken(TokenType.PLUS);
-        }
-        else if (nextIs(TokenType.MINUS)) {
-            specialSymbol = nextText();
-            acceptToken(TokenType.MINUS);
-        }
-        else {
-            throw new SyntaxException("Excepted a PLUS or MINUS.");
-        }
-
-        return new Addop(specialSymbol);
-    }
-
-    protected Mulop parseMulop() {
-        String specialMulop = "";
-
-        if (nextIs(TokenType.TIMES)) {
-            specialMulop = nextText();
-            acceptToken(TokenType.TIMES);
-        }
-        else if (nextIs(TokenType.DIV)) {
-            specialMulop = nextText();
-            acceptToken(TokenType.DIV);
-        }
-        else {
-            throw new SyntaxException("Excepted a TIMES or DIV.");
-        }
-
-        return new Mulop(specialMulop);
-    }
 
     protected Expression parseFactor() {
         Expression result;
