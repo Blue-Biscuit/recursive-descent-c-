@@ -1,9 +1,9 @@
 package com.compth;
 
 public class ExpressionStatement {
-    private Express expression;
+    private Expression expression;
 
-    public ExpressionStatement(Express e) {
+    public ExpressionStatement(Expression e) {
         expression = e;
     }
 

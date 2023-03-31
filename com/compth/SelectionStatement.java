@@ -1,11 +1,11 @@
 package com.compth;
 
 public class SelectionStatement {
-    private Express expr;
+    private Expression expr;
     private Statement ifPart;
     private Statement elsePart; 
 
-    public SelectionStatement(Express expr, Statement ifPart, Statement elsePart) {
+    public SelectionStatement(Expression expr, Statement ifPart, Statement elsePart) {
         this.expr = expr;
         this.ifPart = ifPart;
         this.elsePart = elsePart;

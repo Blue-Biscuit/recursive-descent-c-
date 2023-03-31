@@ -2,10 +2,10 @@ package com.compth;
 
 // iteration-stmt → while ( expression ) statement
 public class IterationStatement {
-    private Express exp;
+    private Expression exp;
     private Statement statement;
 
-    public IterationStatement(Express exp, Statement statement) {
+    public IterationStatement(Expression exp, Statement statement) {
         this.exp = exp;
         this.statement = statement;
     }

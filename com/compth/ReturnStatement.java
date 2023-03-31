@@ -1,9 +1,9 @@
 package com.compth;
 
 public class ReturnStatement { // COMPLETE
-    private Express expression;
+    private Expression expression;
 
-    public ReturnStatement(Express expression) {
+    public ReturnStatement(Expression expression) {
         this.expression = expression;
     }
 

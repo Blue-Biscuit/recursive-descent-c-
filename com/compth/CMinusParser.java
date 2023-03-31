@@ -36,6 +36,10 @@ public class CMinusParser implements Parser {
         }
     }
 
+    protected void acceptToken() {
+        ptr++;
+    }
+
     protected Token nextToken() {
         return tokens.get(ptr);
     }
@@ -330,7 +334,7 @@ public class CMinusParser implements Parser {
 
     // expression-stmt → [expression] ;	
     protected ExpressionStatement parseExpressionStatement() { // implemented
-        Express expression = null;
+        Expression expression = null;
 
         // Parse [ expression ] ;
         if (nextIs(TokenType.ID) || nextIs(TokenType.LPAREN) || nextIs(TokenType.NUM)) {
@@ -343,7 +347,7 @@ public class CMinusParser implements Parser {
   
     // selection-stmt → if ( expression ) statement [ else statement ]
     protected SelectionStatement parseSelectionStatement() { // Implemented
-        Express exp = null;
+        Expression exp = null;
         Statement ifPart = null;
         Statement elsePart = null;
 
@@ -366,7 +370,7 @@ public class CMinusParser implements Parser {
 
     // iteration-stmt → while ( expression ) statement
     protected IterationStatement parseIterationStatement() { // Implemented
-        Express expression = null; 
+        Expression expression = null; 
         Statement statement = null;
 
         acceptToken(TokenType.WHILE);
@@ -380,7 +384,7 @@ public class CMinusParser implements Parser {
 
     // return-stmt -> return [ expression ] ;
     protected ReturnStatement parseReturnStatement() { // Implemented
-        Express expression = null;
+        Expression expression = null;
 
         acceptToken(TokenType.RETURN);
 
@@ -396,178 +400,168 @@ public class CMinusParser implements Parser {
     }
 
     // expression → id expression’ | ( expression ) simple-expression’ | num simple-expression’ 
-    protected Express parseExpression() { // Implemented
-        String identifierString = null;
-        String num = null;
-        ExpressionPrime expressionPrime = null;
-        Express expression = null;
-        SimpleExpressionPrime simpleExpressionPrime = null;
+    protected Expression parseExpression() { // Implemented
+        Expression result;
         
         if (nextIs(TokenType.ID)) {
-            identifierString = nextText();
+            final String id = nextText();
             acceptToken(TokenType.ID);
             
-            expressionPrime = parseExpressionPrime();
+            result = parseExpressionPrime(id);
         }
         else if (nextIs(TokenType.LPAREN)) {
             acceptToken(TokenType.LPAREN);
 
-            expression = parseExpression();
-
+            final Expression lhs = parseExpression();
             acceptToken(TokenType.RPAREN);
 
-            simpleExpressionPrime = parseSimpleExpressionPrime();
+
+            result = parseSimpleExpressionPrime(lhs);
         }
         else if (nextIs(TokenType.NUM)) {
-            num = nextText();
+            final int num = Integer.parseInt(nextText());
             acceptToken(TokenType.NUM);
+            final Expression lhs = new Num(num);
 
-            simpleExpressionPrime = parseSimpleExpressionPrime(); 
+            result = parseSimpleExpressionPrime(lhs); 
         }
         else {
             throw new SyntaxException("Expected an ID, LPAREN, or a NUM.");
         }
-        
-        return new Express(identifierString, num, expressionPrime, expression, simpleExpressionPrime);
+
+        return result;
     }
     
     // expression’ → = expression | \[ expression \] expression’’ | simple-expression’ ( follow factor ) | ( args )
-    protected ExpressionPrime parseExpressionPrime() { // Implemented
-       Express expression = null;
-       ExpressionDoublePrime expressionDoublePrime = null;
-       SimpleExpressionPrime simpleExpressionPrime = null;
-       Args args = null;
+    protected Expression parseExpressionPrime(final String id) { // Implemented
+        Expression result;
 
        // If the next character is \[, parse \[ expression \] expression''
        if (nextIs(TokenType.LBRACKET)) {
+            final Expression index;
+
             acceptToken(TokenType.LBRACKET);
-            expression = parseExpression();
+            index = parseExpression();
             acceptToken(TokenType.RBRACKET);
-            expressionDoublePrime = parseExpressionDoublePrime();
+
+            result = parseExpressionDoublePrime(new Indexed(id, index));
        }
 
        // If the next character is (, parse ( args )
        else if (nextIs(TokenType.LPAREN)) {
             acceptToken(TokenType.LPAREN);
-            args = parseArgs();
+            result = parseArgs(id);
             acceptToken(TokenType.RPAREN);
+            result = parseSimpleExpressionPrime(result);
        }
 
        // If the next character is the assignment operator, parse  = expression
-       // first(expression-stmt) = first(expression) U { ; } = {id, (, num, { }
        else if (nextIs(TokenType.ASSIGN)) {
             acceptToken(TokenType.ASSIGN);
-            expression = parseExpression();
+            result = new BinaryOperation(TokenType.ASSIGN, new Var(id), parseExpression());
        }
 
        // Otherwise, parse simple-expression' ( follow factor ) <-- Dr. G said this was okay
        else {
-            simpleExpressionPrime = parseSimpleExpressionPrime();
-            acceptToken(TokenType.LPAREN);
-            ptr++; // TODO: better solution
-            acceptToken(TokenType.RPAREN);
+            result = parseSimpleExpressionPrime(new Var(id));
        }
 
-       return new ExpressionPrime(expression, expressionDoublePrime, simpleExpressionPrime, args);
+       return result;
     }
     
     // expression’’ → = expression | simple-expression’
-    protected ExpressionDoublePrime parseExpressionDoublePrime() { // implemented
-        Express expression = null;
-        SimpleExpressionPrime simpleExpressionPrime = null;
+    protected Expression parseExpressionDoublePrime(final Expression lhs) { // implemented
+        Expression result;
     
         if (nextIs(TokenType.EQ)) {
-            expression = parseExpression();
+            acceptToken(TokenType.EQ);
+            result = new BinaryOperation(TokenType.EQ, lhs, parseExpression());
         }
         else {
-            simpleExpressionPrime = parseSimpleExpressionPrime();
+            result = parseSimpleExpressionPrime(lhs);
         }
     
-        return new ExpressionDoublePrime(expression, simpleExpressionPrime);
-    
+        return result;
     }
     
     // simple-expression’ → additive-expression’ [ relop additive-expression ]
-    protected SimpleExpressionPrime parseSimpleExpressionPrime() { // Implemented
-        AdditiveExpressionPrime additivePrime = null;
-        AdditiveExpression additive = null;
-        Relop rel = null;
+    protected Expression parseSimpleExpressionPrime(final Expression lhs) { // Implemented
+        Expression result;
 
         // Parse additive-expression'
-        additivePrime = pareseAdditiveExpressionPrime();
+        result = parseAdditiveExpressionPrime(lhs);
 
         // Parse [ relop additive-expression ]
         // first(relop) = { <, <=, >, >=, ==, != }
         if (nextIsRelop())
         {
-            rel = parseRelop();
-            additive = parseAdditiveExpression();
+            TokenType op = nextToken().getType();
+            acceptToken();
+            result = new BinaryOperation(op, result, parseAdditiveExpression());
         }
 
-        return new SimpleExpressionPrime(additivePrime, rel, additive);
+        return result;
 
     }
 
     // additive-expression → term { addop term }
-    protected AdditiveExpression parseAdditiveExpression() { // Implemented
-        Term lhs = null;
-        ArrayList<Addop> ops = new ArrayList<>();
-        ArrayList<Term> rhs = new ArrayList<>();
+    protected Expression parseAdditiveExpression() { // Implemented
+        Expression result;
 
-        lhs = parseTerm();
+        result = parseTerm();
 
         while (nextIsAddop()) {
-            ops.add(parseAddop());
-            rhs.add(parseTerm());
+            TokenType op = nextToken().getType();
+            acceptToken();
+            result = new BinaryOperation(op, result, parseTerm());
         }
-
-        return new AdditiveExpression(lhs, ops, rhs);
+        
+        return result;
     }
 
-    // additive-expression’ → term’ {additive-expression term }
-    protected AdditiveExpressionPrime pareseAdditiveExpressionPrime() { // Implemented
-        TermPrime lhs = null;
-        ArrayList<AdditiveExpression> additiveExpressions = new ArrayList<>();
-        ArrayList<Term> rhs = new ArrayList<>();
+    // additive-expression’ → term’ { addop term }
+    protected Expression parseAdditiveExpressionPrime(final Expression lhs) { // Implemented
+        Expression result;
 
-        lhs = parseTermPrime();
+        result = parseTermPrime(lhs);
 
-        // first(mulop) U first(term) = mulop
-        while (nextIsMulop()) {
-            additiveExpressions.add(parseAdditiveExpression());
-            rhs.add(parseTerm());
+        while (nextIsAddop()) {
+            TokenType op = nextToken().getType();
+            acceptToken();
+            result = new BinaryOperation(op, result, parseTerm());
         }
 
-        return new AdditiveExpressionPrime(lhs, additiveExpressions, rhs);
+        return result;
     }
 
-    // term’ → factor { mulop factor }
-    protected TermPrime parseTermPrime() { // Implemented
-        Factor lhs = null;
-        ArrayList<Mulop> ops = new ArrayList<>();
-        ArrayList<Factor> rhs = new ArrayList<>();
+    // term’ → { mulop factor }
+    protected Expression parseTermPrime(final Expression lhs) { // Implemented
+        Expression result;
 
-        lhs = parseFactor();
+        result = lhs;
 
         while (nextIsMulop()) {
-            ops.add(parseMulop());
-            rhs.add(parseFactor());
+            TokenType op = nextToken().getType();
+            acceptToken();
+            result = new BinaryOperation(op, result, parseFactor());
         }
 
-        return new TermPrime(lhs, ops, rhs);
+        return result;
     }
     
-    // term → { mulop factor }
-    protected Term parseTerm() {
-        ArrayList<Mulop> ops = new ArrayList<>();
-        ArrayList<Factor> factors = new ArrayList<>();
+    // term → factor { mulop factor }
+    protected Expression parseTerm() {
+        Expression result;
+
+        result = parseFactor();
 
         while (nextIsMulop()) {
-            ops.add(parseMulop());
-            factors.add(parseFactor());
+            TokenType op = nextToken().getType();
+            acceptToken();
+            result = new BinaryOperation(op, result, parseFactor());
         }
 
-        return new Term(ops, factors);
+        return result;
     }
 
     protected Relop parseRelop() {
@@ -620,78 +614,77 @@ public class CMinusParser implements Parser {
         return new Mulop(specialMulop);
     }
 
-    protected Factor parseFactor() {
-        Express expression = null;
-        String identifieString = "";
-        Varcall varcall = null;
-        String numString = "";
+    protected Expression parseFactor() {
+        Expression result;
 
         if (nextIs(TokenType.LPAREN)) {
             acceptToken(TokenType.LPAREN);
 
-            expression = parseExpression();
+            result = parseExpression();
 
             acceptToken(TokenType.RPAREN);
         }
         else if (nextIs(TokenType.ID)) {
-            identifieString = nextText();
+            final String identifierString = nextText();
             acceptToken(TokenType.ID);
 
-            varcall = parseVarcall();
+            result = parseVarcall(identifierString);
         }
         else if (nextIs(TokenType.NUM)) {
-            numString = nextText();
+            final int val = Integer.parseInt(nextText());
             acceptToken(TokenType.NUM);
+            result = new Num(val);
         }
         else {
             throw new SyntaxException("Syntax Error: invalid token. Expected an Expression, ID, or NUM. Found" + nextToken());
         }
 
-        return new Factor(expression, identifieString, varcall, numString);
+        return result;
     }
 
-    protected Varcall parseVarcall() {
-        Express expression = null;
-        Args args = null;
+    protected Expression parseVarcall(final String id) {
+        Expression result;
 
         // parse [ expression ]
         if (nextIs(TokenType.LBRACKET)) {
+            final Expression index;
             acceptToken(TokenType.LBRACKET);
-            expression = parseExpression();
+            index = parseExpression();
             acceptToken(TokenType.RBRACKET);
+
+            result = new Indexed(id, index);
         }
 
         // parse ( args )
         else if (nextIs(TokenType.LPAREN)) {
             acceptToken(TokenType.LPAREN);
-            args = parseArgs();
+            result = parseArgs(id);
             acceptToken(TokenType.RPAREN);
         }
 
         // Otherwise, ε.
+        else {
+            result = new Var(id);
+        }
 
         // Return the parse varcall.
-        return new Varcall(expression, args);
+        return result;
     }
 
-    protected Args parseArgs() {
-        ArrayList<Express> expressions = new ArrayList<>();
+    protected Expression parseArgs(final String id) {
+        Expression result;
+        final ArrayList<Expression> expressions = new ArrayList<>();
 
-        // If the next token is in the first set of Expression, parse expressions.
-        if (nextIs(TokenType.ID) || nextIs(TokenType.LPAREN) || nextIs(TokenType.NUM)) {
-            // Parse the first expression
+        if (nextIsInFirstExpression()) {
             expressions.add(parseExpression());
 
-            // Parse following expressions, if they exist
             while (nextIs(TokenType.COMMA)) {
                 acceptToken(TokenType.COMMA);
                 expressions.add(parseExpression());
             }
         }
 
-        // Otherwise, ε.
-
-        // Return the parsed Args.
-        return new Args(expressions);
+        result = new Call(id, expressions);
+        return result;
     }
 }
