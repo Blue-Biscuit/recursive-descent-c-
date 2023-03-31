@@ -1,9 +1,10 @@
 package com.compth;
 
 public class ExpressionStatement extends Statement {
+    private final Expression expression;
 
     public ExpressionStatement(Expression expr) {
-        super(expr);
+        this.expression = expr;
     }
 
     @Override 

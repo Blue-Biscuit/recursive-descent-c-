@@ -1,0 +1,12 @@
+int main(int argv[], int argc) {
+    int result;
+
+    if (argc > 5) {
+        result = argv[0] * argv[1] * argv[2] * argv[3] * argv[4];
+    }
+    else {
+        result = 0;
+    }
+
+    return result;
+}

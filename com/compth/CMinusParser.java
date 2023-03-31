@@ -32,7 +32,7 @@ public class CMinusParser implements Parser {
             ptr++;
         }
         else {
-            throw new SyntaxException("Syntax error: invalid token. Expected " + t.toString() + ".");
+            throw new SyntaxException("Syntax error: invalid token. Expected " + t.toString() + ", found " + nextToken().getType() + ".");
         }
     }
 
@@ -320,11 +320,15 @@ public class CMinusParser implements Parser {
         else if (nextIs(TokenType.RETURN)) {
             result = parseReturnStatement();
         }
+        // Parse compound-stmt
+        else if (nextIs(TokenType.LCURLY)) {
+            result = parseCompoundStatement();
+        }
 
         // Otherwise, throw a syntax error.
 
         else {
-            throw new SyntaxException("Syntax Error: invalid token. Expected SEMI");
+            throw new SyntaxException("Syntax Error: invalid token. Expected statement, found " + nextToken().getType());
         }
 
         return result;
@@ -353,7 +357,7 @@ public class CMinusParser implements Parser {
         acceptToken(TokenType.IF);
         acceptToken(TokenType.LPAREN);
         exp = parseExpression();
-        acceptToken(TokenType.LPAREN);
+        acceptToken(TokenType.RPAREN);
         ifPart = parseStatement();
 
         // Parse [ else statement ]
@@ -372,8 +376,9 @@ public class CMinusParser implements Parser {
         Statement statement = null;
 
         acceptToken(TokenType.WHILE);
-
+        acceptToken(TokenType.LPAREN);
         expression = parseExpression();
+        acceptToken(TokenType.RPAREN);
         statement = parseStatement();
 
         return new IterationStatement(expression, statement);

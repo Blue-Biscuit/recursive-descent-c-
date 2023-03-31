@@ -1,7 +1,7 @@
 package com.compth;
 import java.util.ArrayList;
 
-public class CompoundStatement {
+public class CompoundStatement extends Statement {
     private ArrayList<String> identifierNames;
     private ArrayList<Statement> statements;
 

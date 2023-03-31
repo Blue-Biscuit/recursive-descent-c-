@@ -1,11 +1,12 @@
 package com.compth;
 
 public class SelectionStatement extends Statement {
+    private final Expression expression;
     private final Statement ifPart;
     private final Statement elsePart;
 
     public SelectionStatement(Expression expr, Statement ifPart, Statement elsePart) {
-        super(expr);
+        this.expression = expr;
         this.ifPart = ifPart;
         this.elsePart = elsePart;
     }

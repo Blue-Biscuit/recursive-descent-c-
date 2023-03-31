@@ -1,0 +1,10 @@
+int main(void) {
+    int sum;
+
+    while (sum < 100) {
+        sum = sum + 2 * 3;
+        sum = sum * 2 + 3;
+    }
+
+    return sum;
+}

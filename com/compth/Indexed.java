@@ -22,6 +22,7 @@ public class Indexed extends Expression {
         sb.append(id);
         sb.append(" [\n");
         sb.append(index.toString(tabs + 1, spcInTab));
+        Common.addTabs(sb, tabs, spcInTab);
         sb.append("]\n");
 
         return sb.toString();

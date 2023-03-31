@@ -1,8 +1,10 @@
 package com.compth;
 
 public class ReturnStatement extends Statement { // COMPLETE
+    private final Expression expression;
+
     public ReturnStatement(Expression expression) {
-        super(expression);
+        this.expression = expression;
     }
 
     public String toString(int tabs, int spacesInTab) {

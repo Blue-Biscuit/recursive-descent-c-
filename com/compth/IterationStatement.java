@@ -1,10 +1,11 @@
 package com.compth;
 
 public class IterationStatement extends Statement {
+    private final Expression expression;
     private final Statement stmt;
 
     public IterationStatement(Expression exp, Statement statement) {
-        super(exp);
+        this.expression = exp;
         this.stmt = statement;
     }
 
